@@ -1,0 +1,43 @@
+# todo
+services:
+# PostgreSQL container
+  postgres:
+    image: postgres:18
+    container_name: pg18
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+    ports:
+      - "5432:5432"                     
+    networks:
+      - orderapp-network 
+    volumes:
+      - pg18-data:/var/lib/postgresql
+
+#OrderService container 
+  orderservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: orderservice
+    depends_on:
+      - postgres
+    environment:
+      POSTGRES_DB: order
+      POSTGRES_USER: docker
+      POSTGRES_PASSWORD: docker
+      POSTGRES_TCP_PORT: "5432"
+      DB_HOST: postgres       
+    ports:
+      - "3000:3000"
+    networks:
+      - orderapp-network
+    command: ["/app/ordersystem"]  
+
+networks:
+  orderapp-network:
+    driver: bridge
+
+volumes:
+  pg18-data:
