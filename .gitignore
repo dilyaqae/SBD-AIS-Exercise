@@ -99,3 +99,11 @@ fabric.properties
 
 # Go workspace file
 go.work
+
+
+*.env
+*.local
+*.log
+/dist
+/build
+bin/
