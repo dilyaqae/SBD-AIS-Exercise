@@ -6,7 +6,8 @@ networks:
 
 volumes:
   order_pg_vol:
-  # todo
+  # adding volume for minio data
+  order_minio_vol:
 
 services:
   traefik:
@@ -80,9 +81,25 @@ services:
       - PGPORT=5555
 
   order-minio:
-    # todo use minio/minio:latest as image
+    image: minio/minio:latest
+    # name matches with env variable
+    container_name: order-minio
     # expose 8500
+    ports:
+      - "8500:8500"
     # add to network intercom
+    networks:
+      - intercom
     # use the following commands: "server", "--address", ":8500", "/data"
+    command:
+      - "server"
+      - "--address"
+      - ":8500"
+      - "/data"
     # map the data volume
+    volumes:
+      - order_minio_vol:/data
     # set environment variables MINIO_ROOT_USER and MINIO_ROOT_PASSWORD
+    environment:
+      MINIO_ROOT_USER: root
+      MINIO_ROOT_PASSWORD: verysecret
