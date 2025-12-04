@@ -1,0 +1,71 @@
+syntax = "proto3";
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/empty.proto";
+
+option go_package = "exc8/pb";
+
+package models;
+
+// ------- Messages -------
+
+// defining drink, for each inside field name, type and field number (used by protobuf to encode/decode the field)
+message Drink {
+  int32 id = 1;
+  string name = 2;
+  int32 price = 3;          
+  string description = 4;
+}
+
+// response type for GetDrinks. repeated = list of all available drinks.
+message DrinksResponse {
+  repeated Drink drinks = 1;
+}
+
+// for quantity x drink (like beer x 6)
+message OrderItem {
+  // id of the drink ordered (matches Drink.id)
+  int32 drink_id = 1;
+  int32 quantity = 2;
+}
+
+// for a full order of drinks a client makes
+message Order {
+  // id of this order
+  int32 id = 1;
+  // repeated = a list of OrderItem, so one Order contains many OrderItems
+  repeated OrderItem items = 2;
+}
+
+// response type for GetOrders (to calculate total)
+message OrdersResponse {
+  // repeated = a list of all orders 
+  repeated Order orders = 1; 
+}
+
+// request for RPC, when client calls OrderDrink(), OrderDrinkRequest is sent 
+message OrderDrinkRequest {
+  // contains a list of OrderItems 
+  repeated OrderItem items = 1;
+}
+
+
+
+// Generate go files with:
+// Execute `generate_pb.sh`
+
+// ------- Service -------
+
+// define gRPC service, the functions that the server must provide
+service OrderService {
+  // list available drinks, client sends no data and the full list of drinks is outputted
+  rpc GetDrinks (google.protobuf.Empty) returns (DrinksResponse);
+
+  // place one round of drinks, client sends a list of drink orders, server reads these items 
+  // and stores the new order, the output is a boolean whether the order is accepted
+  rpc OrderDrink (OrderDrinkRequest) returns (google.protobuf.BoolValue);
+
+  // get all orders (to calculate totals), client sends no data and the output is the list of
+  // all orders ever placed, client uses to compute totals
+  rpc GetOrders (google.protobuf.Empty) returns (OrdersResponse);
+}
